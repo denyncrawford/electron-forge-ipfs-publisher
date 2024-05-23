@@ -1,6 +1,6 @@
 {
   "name": "electron-forge-ipfs-publisher",
-  "version": "1.0.12",
+  "version": "1.0.13",
   "description": "",
   "type": "module",
   "exports": {
