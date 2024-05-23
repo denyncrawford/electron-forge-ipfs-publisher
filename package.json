@@ -1,0 +1,4 @@
+{
+  "name": "electron-forge-ipfs-publisher",
+  "packageManager": "yarn@4.2.2"
+}
