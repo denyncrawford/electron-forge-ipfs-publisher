@@ -1,12 +1,19 @@
 {
   "name": "electron-forge-ipfs-publisher",
-  "version": "1.0.0",
+  "version": "1.0.5",
   "description": "",
-  "main": "index.js",
   "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs",
+      "types": "./dist/index.d.ts"
+    }
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "tsup-node src/index.ts --format esm --watch --onSuccess \"node dist/index.js\""
+    "start": "tsup-node src/index.ts --format esm --watch --onSuccess \"node dist/index.mjs\"",
+    "build": "vite build"
   },
   "keywords": [],
   "author": "",
@@ -18,16 +25,23 @@
     "debug": "^4.3.4",
     "fs-extra": "^11.2.0",
     "mime": "^4.0.3",
+    "typescript": "^5.4.5",
     "w3name": "^1.0.8",
     "web-file-polyfill": "^1.0.4"
   },
   "devDependencies": {
+    "@rollup/plugin-commonjs": "^25.0.8",
+    "@rollup/plugin-node-resolve": "^15.2.3",
     "@swc-node/register": "^1.9.1",
     "@swc/cli": "^0.3.12",
     "@swc/core": "^1.5.7",
     "@types/debug": "^4.1.12",
     "@types/fs-extra": "^11.0.4",
+    "@types/mime": "^4.0.0",
     "@types/node": "^20.12.12",
-    "tsup": "^8.0.2"
+    "electron-vite": "^2.2.0",
+    "tsup": "^8.0.2",
+    "vite": "^5.2.11",
+    "vite-plugin-dts": "^3.9.1"
   }
 }
