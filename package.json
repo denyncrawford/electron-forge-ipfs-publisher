@@ -1,6 +1,6 @@
 {
   "name": "electron-forge-ipfs-publisher",
-  "version": "1.0.11",
+  "version": "1.0.12",
   "description": "",
   "type": "module",
   "exports": {
@@ -40,6 +40,7 @@
     "@types/mime": "^4.0.0",
     "@types/node": "^20.12.12",
     "electron-vite": "^2.2.0",
+    "rollup-plugin-node-externals": "^7.1.2",
     "tsup": "^8.0.2",
     "vite": "^5.2.11",
     "vite-plugin-dts": "^3.9.1",
