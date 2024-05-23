@@ -1,12 +1,12 @@
 {
   "name": "electron-forge-ipfs-publisher",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "",
   "type": "module",
   "exports": {
     ".": {
       "import": "./dist/index.js",
-      "require": "./dist/index.cjs",
+      "require": "./dist/index.js",
       "types": "./dist/index.d.ts"
     }
   },
