@@ -1,0 +1,5 @@
+{
+  "name": "@denyncrawford/electron-forge-ipfs-publisher",
+  "version": "1.0.0",
+  "exports": "./src/index.ts"
+}
