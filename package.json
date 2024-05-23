@@ -1,4 +1,33 @@
 {
   "name": "electron-forge-ipfs-publisher",
-  "packageManager": "yarn@4.2.2"
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "tsup-node src/index.ts --format esm --watch --onSuccess \"node dist/index.js\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@electron-forge/publisher-static": "^7.4.0",
+    "@web-std/file": "^3.0.3",
+    "@web3-storage/w3up-client": "^13.1.1",
+    "debug": "^4.3.4",
+    "fs-extra": "^11.2.0",
+    "mime": "^4.0.3",
+    "w3name": "^1.0.8",
+    "web-file-polyfill": "^1.0.4"
+  },
+  "devDependencies": {
+    "@swc-node/register": "^1.9.1",
+    "@swc/cli": "^0.3.12",
+    "@swc/core": "^1.5.7",
+    "@types/debug": "^4.1.12",
+    "@types/fs-extra": "^11.0.4",
+    "@types/node": "^20.12.12",
+    "tsup": "^8.0.2"
+  }
 }

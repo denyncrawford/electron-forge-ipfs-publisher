@@ -1,1 +1,0 @@
-# electron-forge-ipfs-publisher
