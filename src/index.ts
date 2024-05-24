@@ -2,17 +2,18 @@ import {
   PublisherOptions,
   PublisherStatic,
 } from "@electron-forge/publisher-static";
-import { type PublisherIpfsConfig, type IpfsArtifact } from "./types.js";
+import { type PublisherIpfsConfig, type IpfsArtifact } from "./types";
 import debug from "debug";
-import { getClient, upload } from "./upload.js";
-import { publishRevision } from "./publish.js";
+import "fake-indexeddb/auto";
+import { getClient, upload } from "./upload";
+import { publishRevision } from "./publish";
 
 const d = debug("electron-forge:publish:IPFS");
 
 export default class PublisherIPFS extends PublisherStatic<PublisherIpfsConfig> {
   name = "IPFS";
 
-  ipfsKeySafe(name: string) {
+  ipfsKeySafe(name: string): string {
     return name.replace(/@/g, "_").replace(/\//g, "_");
   }
 
@@ -53,18 +54,22 @@ export default class PublisherIPFS extends PublisherStatic<PublisherIpfsConfig> 
       `Open your email at ${this.config.web3StorageEmail} and follow the instructions to log in`
     );
 
+    setStatusLine(`Signing in to web3.storage, open your email at ${this.config.web3StorageEmail} and follow the instructions to log in`);
+
     await getClient(this.config.web3StorageEmail, this.config.space);
 
-    d("uploading files to web3.storage");
+    setStatusLine("Uploading to IPFS");
 
-    const directoryCid = await upload(artifacts, this.config, d);
-    
+    const directoryCid = await upload(artifacts, this.config, setStatusLine);
+
     setStatusLine(`Uploaded to IPFS: ${directoryCid}`);
 
-    d("Publishing to IPFS");
+    setStatusLine("Publishing to IPFS");
 
-    await publishRevision(directoryCid.toString());
+    await publishRevision(`/ipfs/${directoryCid.toString()}`);
 
     setStatusLine("Published to IPFS");
   }
 }
+
+export { PublisherIpfsConfig, PublisherIPFS };

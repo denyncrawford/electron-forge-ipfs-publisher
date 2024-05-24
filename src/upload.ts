@@ -1,6 +1,7 @@
 import { create } from "@web3-storage/w3up-client";
-import { readFile } from "node:fs/promises";
+import fs from "node:fs/promises";
 import { File } from "@web-std/file";
+// @ts-ignore
 import mime from "mime";
 import { DID, Email, IpfsArtifact, PublisherIpfsConfig } from "./types.js";
 
@@ -20,24 +21,23 @@ export async function upload(
   config: PublisherIpfsConfig,
   logger: (message: string) => void
 ) {
+  const client = await getClient(config.web3StorageEmail!, config.space!);
 
-  const client = await getClient(
-    config.web3StorageEmail!,
-    config.space!
+  let bytesToUpload = 0;
+  const artifactFiles = await Promise.all(
+    artifacts.map(async (artifact) => {
+      const read = await fs.readFile(artifact.path);
+      bytesToUpload += read.byteLength;
+      const file = new File([read], artifact.key!, {
+        type: mime.getType(artifact.path) || "application/json",
+      });
+      return file;
+    })
   );
-
-  
-  const artifactFiles = await Promise.all(artifacts.map(async (artifact) => {
-    const read = await readFile(artifact.path);
-    const file = new File([read], artifact.key!, {
-      type: mime.getType(artifact.path) || "application/json",
-    });
-    return file;
-  }));
 
   const directoryCid = await client.uploadDirectory(artifactFiles, {
     onUploadProgress: (progress) => {
-      logger(`Uploaded ${progress.loaded} of ${progress.total}`);
+      logger(`Uploaded ${progress.loaded} of ${bytesToUpload || progress.total}`);
     },
   });
   return directoryCid;

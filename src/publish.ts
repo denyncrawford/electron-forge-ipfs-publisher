@@ -3,45 +3,53 @@ import {
   create,
   v0,
   publish,
-  parse,
   increment,
   resolve,
   Revision,
+  WritableName,
 } from "w3name";
-import { writeFile, readFile } from "node:fs/promises";
-import { join } from "node:path";
+import fs from "node:fs/promises";
+import path from "path";
+import { RevisionFile } from "./types";
 import { ensureDir, exists } from "fs-extra";
-import { RevisionFile } from "./types.js";
 
-const keysDirname = join(process.cwd(), ".w3name");
-const nameKeyPath = join(keysDirname, "name.key");
-const revisionKeyPath = join(keysDirname, "../ipfs.revision.json");
-
-await ensureDir(keysDirname);
+const keysDirname = path.join(process.cwd(), ".w3name");
+const nameKeyPath = path.join(keysDirname, "name.key");
+const revisionKeyPath = path.join(keysDirname, "../ipfs.forge.json");
 
 export const createPublishingName = async () => {
   const name = await create();
-  await writeFile(nameKeyPath, name.key.bytes);
+  await fs.writeFile(nameKeyPath, name.key.bytes);
 };
 
 export const loadPublishingName = async () => {
-  const existsPrivateKey = await exists(keysDirname);
+  await ensureDir(keysDirname);
+  const existsPrivateKey = await exists(nameKeyPath);
 
   if (!existsPrivateKey) {
     await createPublishingName();
   }
 
-  const key = await readFile(nameKeyPath);
+  const key = await fs.readFile(nameKeyPath);
   const name = await from(key);
 
   return name;
 };
 
-export const writeRevision = async ({ value: latest }: Revision) => {
-  await writeFile(
+export const writeRevision = async (
+  { value: latest }: Revision,
+  nameKey: WritableName,
+  currentRevision?: RevisionFile
+) => {
+  await ensureDir(keysDirname);
+
+  await fs.writeFile(
     revisionKeyPath,
     JSON.stringify({
-      latest,
+      ...(currentRevision || {}),
+      latest_revision: latest.toString(),
+      w3s: `/name/${nameKey.toString()}`,
+      ipns: `/ipns/${nameKey.toString()}`,
     })
   );
 };
@@ -54,14 +62,13 @@ export const publishRevision = async (value: string) => {
 
   if (!existsRevision) {
     revision = await v0(nameKey, value);
-    await writeRevision(revision);
+    await writeRevision(revision, nameKey);
   } else {
-    const revisionJson = await readFile(revisionKeyPath, "utf8");
+    const latestRevision = await resolve(nameKey);
+    const revisionJson = await fs.readFile(revisionKeyPath, "utf8");
     const revisionFile = JSON.parse(revisionJson) as RevisionFile;
-    const revisionAsName = parse(revisionFile.latest);
-    const latestRevision = await resolve(revisionAsName);
     revision = await increment(latestRevision, value);
-    await writeRevision(revision);
+    await writeRevision(revision, nameKey, revisionFile);
   }
 
   await publish(revision, nameKey.key);
