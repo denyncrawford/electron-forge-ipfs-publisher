@@ -8,18 +8,14 @@ import {
   Revision,
   WritableName,
 } from "w3name";
-import fs from "node:fs/promises";
-import path from "path";
-import { RevisionFile } from "./types";
+import { readFile, writeFile } from "node:fs/promises";
 import { ensureDir, exists } from "fs-extra";
-
-const keysDirname = path.join(process.cwd(), ".w3name");
-const nameKeyPath = path.join(keysDirname, "name.key");
-const revisionKeyPath = path.join(keysDirname, "../ipfs.forge.json");
+import { type RevisionFile } from "./types";
+import { keysDirname, nameKeyPath, revisionKeyPath } from "./utils";
 
 export const createPublishingName = async () => {
   const name = await create();
-  await fs.writeFile(nameKeyPath, name.key.bytes);
+  await writeFile(nameKeyPath, name.key.bytes);
 };
 
 export const loadPublishingName = async () => {
@@ -30,7 +26,7 @@ export const loadPublishingName = async () => {
     await createPublishingName();
   }
 
-  const key = await fs.readFile(nameKeyPath);
+  const key = await readFile(nameKeyPath);
   const name = await from(key);
 
   return name;
@@ -43,11 +39,11 @@ export const writeRevision = async (
 ) => {
   await ensureDir(keysDirname);
 
-  await fs.writeFile(
+  await writeFile(
     revisionKeyPath,
     JSON.stringify({
       ...(currentRevision || {}),
-      latest_revision: latest.toString(),
+      ipfs: `/ipfs/${latest.toString()}`,
       w3s: `/name/${nameKey.toString()}`,
       ipns: `/ipns/${nameKey.toString()}`,
     })
@@ -65,7 +61,7 @@ export const publishRevision = async (value: string) => {
     await writeRevision(revision, nameKey);
   } else {
     const latestRevision = await resolve(nameKey);
-    const revisionJson = await fs.readFile(revisionKeyPath, "utf8");
+    const revisionJson = await readFile(revisionKeyPath, "utf8");
     const revisionFile = JSON.parse(revisionJson) as RevisionFile;
     revision = await increment(latestRevision, value);
     await writeRevision(revision, nameKey, revisionFile);

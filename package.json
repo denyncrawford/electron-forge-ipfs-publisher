@@ -22,6 +22,7 @@
     "@electron-forge/publisher-static": "^7.4.0",
     "@web-std/file": "^3.0.3",
     "@web3-storage/w3up-client": "^13.1.1",
+    "axios": "^1.7.2",
     "debug": "^4.3.4",
     "fake-indexeddb": "^6.0.0",
     "fs-extra": "^11.2.0",

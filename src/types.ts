@@ -1,6 +1,7 @@
 export interface RevisionFile {
-  latest_revision: string;
-  url: string;
+  ipfs: string;
+  ipns: string;
+  w3s: string;
 }
 
 export interface SquirrelMacRelease {
@@ -27,6 +28,13 @@ export interface IpfsArtifact {
   key?: string;
 };
 
+export type InternalReleaseData = IpfsArtifact & SquirrelMacRelease;
+
+export interface ResultBlock {
+  releaseArtifact: InternalReleaseData;
+  artifacts: IpfsArtifact[];
+}
+
 export type Email = `${string}@${string}`;
 export type DID = `did:${string}:${string}`;
 
@@ -50,6 +58,12 @@ export interface PublisherIpfsConfig {
      * Custom function to provide the key to upload a given file to
      */
     keyResolver?: (fileName: string, platform: string, arch: string) => string;
+
+    /**
+     * Publisher release notes
+     */
+
+    notes?: string;
   }
 
   export interface Driver<T> {
