@@ -9,10 +9,11 @@ import {
   ResultBlock,
   RevisionFile,
   SquirrelMacReleases,
-  InternalReleaseData
+  InternalReleaseData,
 } from "./types.js";
 import axios from "axios";
-import { defaultGateway, revisionKeyPath } from "./utils";
+import { defaultGateway, revisionKeyPath, sessionDirname } from "./utils";
+import { StoreConf } from "./utils";
 
 let mainClient: Awaited<ReturnType<typeof create>>;
 let readLocal: string;
@@ -24,11 +25,25 @@ let readLocal: string;
  * @returns Client
  */
 
-export const getClient = async (email: Email, space: DID) => {
+export const getClient = async (config: PublisherIpfsConfig) => {
   if (!mainClient) {
-    mainClient = await create();
-    await mainClient.login(email);
-    await mainClient.setCurrentSpace(space);
+    const store = !!config.enableExperimentalSession
+      ? new StoreConf({
+          dir: sessionDirname,
+        })
+      : undefined;
+
+    await store?.init?.();
+
+    mainClient = await create({
+      store,
+    });
+
+    await mainClient.login(config.web3StorageEmail!);
+    const currentSpace = config.space
+      ? config.space
+      : (await mainClient.createSpace("electron-forge")).did();
+    await mainClient.setCurrentSpace(currentSpace);
   }
   return mainClient;
 };
@@ -70,38 +85,51 @@ export async function upload(
   config: PublisherIpfsConfig,
   logger: (message: string) => void
 ) {
-  const client = await getClient(config.web3StorageEmail!, config.space!);
+  const client = await getClient(config);
 
   let bytesToUpload = 0;
 
   logger(`Finding previous releases for ${artifacts.length} results`);
 
-  const releaseArtifactsFiles = await Promise.all(
-    artifacts
-      .flatMap((e) => e.releaseArtifact)
-      // If the release artifact is the same folder as previous release artifacts, then it's a duplicate
-      .filter((e, i, a) => a.findIndex((e2) => e2.key === e.key) === i)
-      .map(async (artifact) => {
-        const [read, remoteLastPath] = await getLatestReleasesFile(artifact);
-        // manipulate new version info
-        const newVersion = {
-          version: artifact.version,
-          updateTo: {
-            ...artifact.updateTo,
-            url: remoteLastPath,
-          },
-        };
-        read.currentRelease = artifact.version;
-        read.releases?.push(newVersion);
+  const releaseArtifactsFiles = !config.overrideReleasesFile
+    ? []
+    : await Promise.all(
+        artifacts
+          .flatMap((e) => e.releaseArtifact)
+          // If the release artifact is the same folder as previous release artifacts, then it's a duplicate
+          .filter((e, i, a) => a.findIndex((e2) => e2.key === e.key) === i)
+          .map(async (artifact) => {
+            const [read, remoteLastPath] = await getLatestReleasesFile(
+              artifact
+            );
 
-        const buffer = Buffer.from(JSON.stringify(read));
-        const file = new File([buffer], artifact.key!, {
-          type: "application/json",
-        });
+            // manipulate new version info
+            const newVersion = {
+              version: artifact.version,
+              updateTo: {
+                ...artifact.updateTo,
+                url: remoteLastPath,
+              },
+            };
 
-        return file;
-      })
-  );
+            const upgradedReleases: SquirrelMacReleases = {
+              currentRelease: artifact.version,
+              releases: [
+                ...(read.releases?.filter(
+                  (e) => e.version !== artifact.version
+                ) || []),
+                newVersion,
+              ],
+            };
+
+            const buffer = Buffer.from(JSON.stringify(upgradedReleases));
+            const file = new File([buffer], artifact.key!, {
+              type: "application/json",
+            });
+
+            return file;
+          })
+      );
 
   logger(`Reading artifacts...`);
 

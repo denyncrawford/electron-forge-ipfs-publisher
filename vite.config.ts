@@ -18,6 +18,7 @@ export default defineConfig({
       exclude: [
         "debug",
         "@web3-storage/w3up-client",
+        "node-persist",
         "w3name",
         "mime",
         "@electron-forge/publisher-static",

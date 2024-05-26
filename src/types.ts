@@ -26,7 +26,7 @@ export interface IpfsArtifact {
   platform: string;
   arch: string;
   key?: string;
-};
+}
 
 export type InternalReleaseData = IpfsArtifact & SquirrelMacRelease;
 
@@ -39,52 +39,68 @@ export type Email = `${string}@${string}`;
 export type DID = `did:${string}:${string}`;
 
 export interface PublisherIpfsConfig {
-    /**
-     * The email address to use for your Web3.Storage account
-     */
-    web3StorageEmail: Email;
+  /**
+   * The email address to use for your Web3.Storage account
+   */
+  web3StorageEmail: Email;
 
-    /**
-     * The space to upload to
-     */
-    space: DID;
+  /**
+   * The space to upload to
+   */
+  space?: DID;
 
-    /**
-     * the folder to upload to
-     */ 
-    folder?: string;
+  /**
+   * the folder to upload to
+   */
+  folder?: string;
 
-    /**
-     * Custom function to provide the key to upload a given file to
-     */
-    keyResolver?: (fileName: string, platform: string, arch: string) => string;
+  /**
+   * Custom function to provide the key to upload a given file to
+   */
+  keyResolver?: (fileName: string, platform: string, arch: string) => string;
 
-    /**
-     * Publisher release notes
-     */
+  /**
+   * Publisher release notes
+   */
 
-    notes?: string;
-  }
+  notes?: string;
 
-  export interface Driver<T> {
-    /**
-     * Open driver
-     */
-    open: () => Promise<void>;
-    /**
-     * Clean up and close driver
-     */
-    close: () => Promise<void>;
-    /**
-     * Persist data to the driver's backend
-     */
-    save: (data: T) => Promise<void>;
-    /**
-     * Loads data from the driver's backend
-     */
-    load: () => Promise<T | undefined>;
-    /**
-     * Clean all the data in the driver's backend
-     */
-    reset: () => Promise<void>;
+  /**
+   * Persist the session data to the .w3name folder using UCAN (experimental)
+   */
+
+  enableExperimentalSession?: boolean;
+
+  /**
+   * Override the releases file
+   */
+  overrideReleasesFile?: boolean;
+
+  /**
+   * Enable autogenerate space
+   */
+  autoGenerateSpace?: boolean;
+}
+
+export interface Driver<T> {
+  /**
+   * Open driver
+   */
+  open: () => Promise<void>;
+  /**
+   * Clean up and close driver
+   */
+  close: () => Promise<void>;
+  /**
+   * Persist data to the driver's backend
+   */
+  save: (data: T) => Promise<void>;
+  /**
+   * Loads data from the driver's backend
+   */
+  load: () => Promise<T | undefined>;
+  /**
+   * Clean all the data in the driver's backend
+   */
+  reset: () => Promise<void>;
 }

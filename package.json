@@ -1,6 +1,6 @@
 {
   "name": "electron-forge-ipfs-publisher",
-  "version": "1.0.25",
+  "version": "1.0.40",
   "description": "",
   "type": "module",
   "exports": {
@@ -11,7 +11,7 @@
     }
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "vitest",
     "start": "tsup-node src/index.ts --format esm --watch --onSuccess \"node dist/index.mjs\"",
     "build": "vite build"
   },
@@ -27,6 +27,7 @@
     "fake-indexeddb": "^6.0.0",
     "fs-extra": "^11.2.0",
     "mime": "^4.0.3",
+    "node-persist": "^4.0.1",
     "typescript": "^5.4.5",
     "w3name": "^1.0.8",
     "web-file-polyfill": "^1.0.4"
@@ -41,11 +42,13 @@
     "@types/fs-extra": "^11.0.4",
     "@types/mime": "^4.0.0",
     "@types/node": "^20.12.12",
+    "@types/node-persist": "^3.1.8",
     "electron-vite": "^2.2.0",
     "rollup-plugin-node-externals": "^7.1.2",
     "tsup": "^8.0.2",
     "vite": "^5.2.11",
     "vite-plugin-dts": "^3.9.1",
-    "vite-plugin-node": "^3.1.0"
+    "vite-plugin-node": "^3.1.0",
+    "vitest": "^1.6.0"
   }
 }

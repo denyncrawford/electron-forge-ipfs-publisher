@@ -19,9 +19,9 @@ export default class PublisherIPFS extends PublisherStatic<PublisherIpfsConfig> 
   }
 
   async publish({ makeResults, setStatusLine, forgeConfig }: PublisherOptions) {
-    if (!this.config.space) {
+    if (!this.config.space && !this.config.autoGenerateSpace) {
       throw new Error(
-        'In order to publish to IPFS, you must set the "space" property in your Forge publisher config. See the docs for more info'
+        "In order to publish to IPFS, you must set the 'space' property in your Forge publisher config. If you don't have an account you can use the 'autoGenerateSpace' property to generate a new space for you. (Be careful, this will generate a new space with every run)"
       );
     }
 
@@ -36,7 +36,6 @@ export default class PublisherIPFS extends PublisherStatic<PublisherIpfsConfig> 
     let artifacts: ResultBlock[] = [];
 
     for (const makeResult of makeResults) {
-      
       const releaseArtifact = {
         path: "RELEASES.json",
         keyPrefix:
@@ -83,10 +82,10 @@ export default class PublisherIPFS extends PublisherStatic<PublisherIpfsConfig> 
     );
 
     setStatusLine(
-      `Signing in to web3.storage, open your email and follow the instructions to log in`
+      `Signing in to web3.storage: Open your email and follow the instructions to log in`
     );
 
-    await getClient(this.config.web3StorageEmail, this.config.space);
+    await getClient(this.config);
 
     setStatusLine("Uploading to IPFS");
 
